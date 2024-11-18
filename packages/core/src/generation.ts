@@ -2,6 +2,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGroq } from "@ai-sdk/groq";
 import { createOpenAI } from "@ai-sdk/openai";
 import { getModel } from "./models.ts";
+
 import {
     generateText as aiGenerateText,
     generateObject as aiGenerateObject,
@@ -106,22 +107,73 @@ export async function generateText({
             case ModelProviderName.OPENAI:
             case ModelProviderName.LLAMACLOUD: {
                 elizaLogger.debug("Initializing OpenAI model.");
-                const openai = createOpenAI({ apiKey, baseURL: endpoint });
 
-                const { text: openaiResponse } = await aiGenerateText({
-                    model: openai.languageModel(model),
-                    prompt: context,
-                    system:
-                        runtime.character.system ??
-                        settings.SYSTEM_PROMPT ??
-                        undefined,
-                    temperature: temperature,
-                    maxTokens: max_response_length,
-                    frequencyPenalty: frequency_penalty,
-                    presencePenalty: presence_penalty,
+                //Achievement: Generate messages using text completion via Hyperbolic's API.
+
+                //Problem: Previous constructor and text generation method did not allow
+                //for specification of a model.
+
+                //Solution: Switch to the OpenAI constructor that allows for model selection
+                //Problem: OpenAi SDK was timing out
+
+                //Solution: Use HTTP requests directly to Hyperbolic's API
+
+                // const openai = createOpenAI({ apiKey, baseURL: endpoint });
+
+                const openai = new OpenAI({
+                    apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWxhYXI0bmV0QGdtYWlsLmNvbSIsImlhdCI6MTcyOTQ0MzUzOH0.KRS9-e1EJjrkmMqwl2pzmERau6sKdhOStfIRFxKAvGU",
+                    baseURL: "https://api.hyperbolic.xyz/v1",
+                });
+                // const openai = createOpenAI({
+                //     apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWxhYXI0bmV0QGdtYWlsLmNvbSIsImlhdCI6MTcyOTQ0MzUzOH0.KRS9-e1EJjrkmMqwl2pzmERau6sKdhOStfIRFxKAvGU",
+                //     baseURL: "https://api.hyperbolic.xyz/v1",
+                // });
+                // console.log("PRINTING OUT LANGUAGE MODEL");
+                // console.log(openai.languageModel(model));
+                // const { text: openaiResponse } = await aiGenerateText({
+                //     model: openai.languageModel(model),
+                //     prompt: context,
+                //     system:
+                //         runtime.character.system ??
+                //         settings.SYSTEM_PROMPT ??
+                //         undefined,
+                //     temperature: temperature,
+                //     maxTokens: max_response_length,
+                //     frequencyPenalty: frequency_penalty,
+                //     presencePenalty: presence_penalty,
+                // });
+
+                const url = "https://api.hyperbolic.xyz/v1/chat/completions";
+
+                const chatResponse = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWxhYXI0bmV0QGdtYWlsLmNvbSIsImlhdCI6MTcyOTQ0MzUzOH0.KRS9-e1EJjrkmMqwl2pzmERau6sKdhOStfIRFxKAvGU",
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/Llama-3.2-3B-Instruct",
+                        messages: [
+                            {
+                                role: "user",
+                                content: context,
+                            },
+                        ],
+                        max_tokens: 512,
+                        temperature: 0.7,
+                        top_p: 0.9,
+                        stream: false,
+                    }),
                 });
 
-                response = openaiResponse;
+                const json = await chatResponse.json();
+
+                const output = json.choices[0].message.content;
+                console.log("AI CHAT OUTPUT");
+                console.log(output);
+
+                response = output;
                 elizaLogger.debug("Received response from OpenAI model.");
                 break;
             }

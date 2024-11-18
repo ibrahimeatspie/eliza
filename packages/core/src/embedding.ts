@@ -38,16 +38,25 @@ async function getRemoteEmbedding(
 
     // Construct full URL
     const fullUrl = `${baseEndpoint}/embeddings`;
-
+    // console.log("REMOTE EMBEDDINGS URL");
+    // console.log(fullUrl);
+    // console.log("REMOTE EMBEDDINGS API KEY");
+    // console.log(options.apiKey);
     //console.log("Calling embedding API at:", fullUrl); // Debug log
 
+
+    //achievement: Create vector embeddings 
+    //Problem: Using Hyperbolic's Key would not allow creation of embeddings
+    //using OpenAI's API
+
+    //Solution: separately use an Open AI key to generate embeddings.
     const requestOptions = {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             ...(options.apiKey
                 ? {
-                      Authorization: `Bearer ${options.apiKey}`,
+                      Authorization: `Bearer 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`,
                   }
                 : {}),
         },

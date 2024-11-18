@@ -132,6 +132,8 @@ export class TwitterInteractionClient extends ClientBase {
                     );
 
                     await buildConversationThread(tweet, this);
+                    console.log("TWEET TEXT");
+                    console.log(tweet.text);
 
                     const message = {
                         content: { text: tweet.text },
