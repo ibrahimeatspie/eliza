@@ -31,6 +31,7 @@ async function getRemoteEmbedding(
     input: string,
     options: EmbeddingOptions
 ): Promise<number[]> {
+    const openaiapikey = process.env.OPENAI_API_KEY_NOT_HYPERBOLIC;
     // Ensure endpoint ends with /v1 for OpenAI
     const baseEndpoint = options.endpoint.endsWith("/v1")
         ? options.endpoint
@@ -44,8 +45,7 @@ async function getRemoteEmbedding(
     // console.log(options.apiKey);
     //console.log("Calling embedding API at:", fullUrl); // Debug log
 
-
-    //achievement: Create vector embeddings 
+    //achievement: Create vector embeddings
     //Problem: Using Hyperbolic's Key would not allow creation of embeddings
     //using OpenAI's API
 
@@ -56,7 +56,7 @@ async function getRemoteEmbedding(
             "Content-Type": "application/json",
             ...(options.apiKey
                 ? {
-                      Authorization: `Bearer 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`,
+                      Authorization: `Bearer ` + openaiapikey,
                   }
                 : {}),
         },
